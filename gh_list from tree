@@ -1,0 +1,24 @@
+import ghpythonlib.treehelpers as th
+
+def flatten_splitlines(data):
+    result = []
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, list):
+                result.extend(flatten_splitlines(item))
+            elif isinstance(item, str):
+                result.extend(item.splitlines())
+            else:
+                result.extend(str(item).splitlines())
+    else:
+        if isinstance(data, str):
+            result.extend(data.splitlines())
+        else:
+            result.extend(str(data).splitlines())
+    return result
+
+# Convert the Grasshopper DataTree to nested Python list
+nested_list = th.tree_to_list(text_list, retrieve_base=None)
+
+# Flatten and split lines
+result_text = flatten_splitlines(nested_list)
