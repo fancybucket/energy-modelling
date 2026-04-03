@@ -1,0 +1,39 @@
+import os
+import shutil
+
+result_text = []
+result_true = False
+
+if run:
+    # Convert path_text to list of paths
+    if isinstance(path_text, str):
+        lines = [line.strip() for line in path_text.splitlines() if line.strip()]
+    elif isinstance(path_text, list):
+        lines = path_text
+    else:
+        result_text.append("Error: 'path_text' input must be string or list of strings.")
+    
+    # Only proceed if lines variable exists and is a list (safe-guard)
+    if 'lines' in locals():
+        for path in lines:
+            if not os.path.exists(path):
+                result_text.append(f"Does not exist: {path}")
+                continue
+            try:
+                if os.path.isfile(path):
+                    os.remove(path)
+                    result_text.append(f"Deleted file: {path}")
+                elif os.path.isdir(path):
+                    shutil.rmtree(path)
+                    result_text.append(f"Deleted folder: {path}")
+                else:
+                    result_text.append(f"Unknown path type: {path}")
+            except Exception as e:
+                result_text.append(f"Failed to delete '{path}': {str(e)}")
+
+        any_remain = any(os.path.exists(p) for p in lines)
+        result_true = not any_remain
+else:
+    # Default output if run is False
+    result_text = []
+    result_true = False
