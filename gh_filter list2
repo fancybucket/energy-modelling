@@ -1,0 +1,58 @@
+# Inputs: filter_words, contain_words, tree
+
+def safe_str_list(items):
+    result = []
+    if items is None:
+        return result
+    for item in items:
+        if hasattr(item, '__str__'):
+            result.append(str(item).strip().lower())
+        elif isinstance(item, str):
+            result.append(item.strip().lower())
+    return result
+
+filter_words_str = safe_str_list(filter_words) if filter_words else []
+contain_words_str = safe_str_list(contain_words) if contain_words else []
+
+if not filter_words_str:
+    filtered = tree
+    inverse_filtered = []
+else:
+    # DEBUG: Print what's happening
+    print("Filter words:", filter_words_str)
+    print("Contain words:", contain_words_str)
+    print("Tree length:", len(tree) if tree else 0)
+    
+    filter_set = set(filter_words_str)
+    contain_set = set(contain_words_str)
+
+    filtered = []
+    inverse_filtered = []
+    
+    for i, branch in enumerate(tree):
+        # Preserve original branch exactly
+        branch_items = []
+        if isinstance(branch, str):
+            branch_items = [branch.lower()]
+        elif hasattr(branch, '__iter__') and not isinstance(branch, str):
+            branch_items = [str(item).lower() for item in branch]
+        else:
+            branch_items = [str(branch).lower()]
+
+        contains_filter = any(f in word for f in filter_set for word in branch_items)
+        contains_contain = any(c in word for c in contain_set for word in branch_items)
+
+        if contains_filter and not contains_contain:
+            inverse_filtered.append(branch)
+            print(f"Branch {i} FILTERED OUT: contains_filter={contains_filter}, contains_contain={contains_contain}")
+        else:
+            filtered.append(branch)
+            print(f"Branch {i} KEPT: contains_filter={contains_filter}, contains_contain={contains_contain}")
+
+print(f"Final: filtered={len(filtered)}, inverse_filtered={len(inverse_filtered)}")
+
+# SIMPLE ALTERNATIVE: If logic still fails, use set difference
+if len(filtered) == len(tree):  # No filtering happened
+    inverse_filtered = []
+elif len(inverse_filtered) == 0:  # Logic failed, use math
+    inverse_filtered = [x for x in tree if x not in filtered]
